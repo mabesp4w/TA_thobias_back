@@ -133,8 +133,8 @@ class LokasiPenjualanListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LokasiPenjualan
-        fields = ['id', 'nm_lokasi', 'tipe_lokasi', 'alamat', 'kecamatan_nama',
-                  'kabupaten_nama', 'provinsi_nama', 'kecamatan_detail',
+        fields = ['id', 'nm_lokasi', 'tipe_lokasi', 'alamat', 'tlp_pengelola', 'kecamatan_nama',
+                  'kabupaten_nama', 'provinsi_nama', 'latitude', 'longitude', 'kecamatan_detail',
                   'kabupaten_detail', 'provinsi_detail', 'total_penjualan']
 
     def get_kecamatan_nama(self, obj):
