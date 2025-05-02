@@ -209,8 +209,8 @@ class ProdukTerjual(models.Model):
                                          related_name='penjualan')
     tgl_penjualan = models.DateField()
     jumlah_terjual = models.PositiveIntegerField()
-    harga_jual = models.DecimalField(max_digits=12, decimal_places=2)
-    total_penjualan = models.DecimalField(max_digits=15, decimal_places=2)
+    harga_jual = models.IntegerField()
+    total_penjualan = models.IntegerField()
     catatan = models.TextField(blank=True, null=True)
     tgl_pelaporan = models.DateTimeField(auto_now_add=True)
 

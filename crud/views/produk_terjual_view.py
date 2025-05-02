@@ -31,7 +31,7 @@ class ProdukTerjualViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action in ['my_sales', 'create_my_sale', 'update_my_sale']:
+        if self.action in ['my_sales', 'create_my_sale', 'update_my_sale','destroy_my_sale']:
             permission_classes = [IsAuthenticated]
         elif self.action == 'list' or self.action == 'retrieve':
             permission_classes = [IsAuthenticated]
@@ -233,3 +233,30 @@ class ProdukTerjualViewSet(viewsets.ModelViewSet):
             'message': 'Berhasil memperbarui data penjualan',
             'data': serializer.data
         })
+
+    @action(detail=True, methods=['delete'])
+    def destroy_my_sale(self, request, pk=None, *args, **kwargs):
+        """
+            Menghapus produk terjual milik UMKM yang sedang login
+            """
+        try:
+            penjualan = ProdukTerjual.objects.get(pk=pk)
+            # Check if the product of this sale belongs to the logged-in UMKM
+            if penjualan.produk.umkm != request.user:
+                return Response({
+                    'status': 'error',
+                    'message': 'Produk tidak ditemukan atau bukan milik Anda'
+                }, status=status.HTTP_403_FORBIDDEN)
+
+        except ProdukTerjual.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Produk tidak ditemukan'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        penjualan.delete()
+
+        return Response({
+            'status': 'success',
+            'message': f'Berhasil menghapus penjualan'
+        }, status=status.HTTP_200_OK)
