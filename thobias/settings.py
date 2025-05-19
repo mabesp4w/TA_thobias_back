@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_spectacular',
     'rest_framework',
     'oauth2_provider',
     'corsheaders',
@@ -80,6 +81,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 # Konfigurasi untuk OAuth2
@@ -110,17 +112,17 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Tambahkan domain localhost dengan spesifik port ke dalam CORS_ALLOWED_ORIGINS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3099",
-    "https://paul.ta-uogp.my.id",
-    "https://paul-wwf.vercel.app"
+    "https://thobias.ta-uogp.my.id",
+    "https://thobias-wwf.vercel.app"
 ]
 
-# ALLOWED_HOSTS = ['paul.ta-uogp.my.id', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['thobias.ta-uogp.my.id', 'localhost', '127.0.0.1']
 ALLOWED_HOSTS=['*']
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3099",
-    "https://paul.ta-uogp.my.id",
-    "https://paul-wwf.vercel.app"
+    "https://thobias.ta-uogp.my.id",
+    "https://thobias-wwf.vercel.app"
 ]
 
 CORS_ALLOW_METHODS = [
@@ -168,11 +170,11 @@ WSGI_APPLICATION = 'thobias.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TA_thobias',
-        'USER': 'root',
-        'PASSWORD': 'smartspartacus',
-        'HOST': 'localhost',  # atau IP database server
-        'PORT': '3306',       # port default MySQL
+        'NAME': os.environ.get('DB_NAME', 'TA_thobias'),
+        'USER': os.environ.get('DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'smartspartacus'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
     }
 }
 
@@ -218,3 +220,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API UMKM WWF',
+    'DESCRIPTION': 'API Documentation for UMKM WWF System',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}

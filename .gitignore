@@ -51,3 +51,6 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+
+crud/migrations
+authentication/migrations

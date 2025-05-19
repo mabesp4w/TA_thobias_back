@@ -12,7 +12,8 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name','show_password', 'last_name', 'role', 'is_active', 'date_joined',
+        fields = ['id', 'username', 'email', 'first_name', 'show_password', 'last_name', 'role', 'is_active',
+                  'date_joined',
                   'last_login']
         read_only_fields = ['date_joined', 'last_login']
 
@@ -32,6 +33,35 @@ class UserSerializer(serializers.ModelSerializer):
                   'show_password', 'date_joined', 'last_login']
         read_only_fields = ['date_joined', 'last_login']
 
+    def validate_email(self, value):
+        """
+        Validasi agar email harus unik
+        """
+        if value:  # Hanya validasi jika email diisi
+            # Check untuk create (instance belum ada)
+            if not self.instance and User.objects.filter(email=value).exists():
+                raise serializers.ValidationError("Email ini sudah digunakan oleh user lain.")
+
+            # Check untuk update (instance sudah ada)
+            if self.instance and User.objects.filter(email=value).exclude(id=self.instance.id).exists():
+                raise serializers.ValidationError("Email ini sudah digunakan oleh user lain.")
+
+        return value
+
+    def validate_username(self, value):
+        """
+        Validasi agar username harus unik (opsional karena biasanya sudah unique di model)
+        """
+        # Check untuk create (instance belum ada)
+        if not self.instance and User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("Username ini sudah digunakan oleh user lain.")
+
+        # Check untuk update (instance sudah ada)
+        if self.instance and User.objects.filter(username=value).exclude(id=self.instance.id).exists():
+            raise serializers.ValidationError("Username ini sudah digunakan oleh user lain.")
+
+        return value
+
     def validate(self, attrs):
         # Validasi password dan konfirmasi password harus sama
         if 'password' in attrs and 'password_confirmation' in attrs:
@@ -39,6 +69,12 @@ class UserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     "password_confirmation": "Password dan konfirmasi password tidak cocok."
                 })
+
+        # Validasi email tidak boleh kosong jika disediakan
+        if 'email' in attrs and not attrs['email']:
+            raise serializers.ValidationError({
+                "email": "Email tidak boleh kosong."
+            })
 
         return attrs
 
