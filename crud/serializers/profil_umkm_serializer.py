@@ -1,3 +1,5 @@
+# serializers/profile_umkm_serializer
+
 from rest_framework import serializers
 from ..models import ProfilUMKM
 from django.contrib.auth import get_user_model

@@ -1,12 +1,13 @@
 # models.py
+import os
 import uuid
 
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.validators import MinValueValidator
 from django.utils import timezone
+from jsonschema.exceptions import ValidationError
 
 from thobias import settings
 
@@ -226,3 +227,66 @@ class ProdukTerjual(models.Model):
         db_table = "produk_terjual"
         verbose_name_plural = "Produk Terjual"
         ordering = ['tgl_penjualan']
+
+
+def validate_excel_file(value):
+    """
+    Validator untuk memastikan file yang diupload adalah Excel
+    """
+
+    # Limit ukuran file (5MB)
+    if value.size > 5 * 1024 * 1024:
+        raise ValidationError('Ukuran file tidak boleh lebih dari 5MB')
+
+
+def file_upload_path(instance, filename):
+    """
+    Path untuk upload file penjualan
+    """
+    return f'penjualan/{instance.umkm.username}/{filename}'
+
+
+class FilePenjualan(models.Model):
+    """
+    Model untuk menyimpan file Excel detail penjualan UMKM
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    umkm = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='file_penjualan')
+    file = models.FileField(upload_to=file_upload_path, validators=[validate_excel_file])
+    nama_file = models.CharField(max_length=255)
+    deskripsi = models.TextField(blank=True, null=True)
+    tgl_upload = models.DateTimeField(auto_now_add=True)
+    tgl_update = models.DateTimeField(auto_now=True)
+    ukuran_file = models.PositiveIntegerField(default=0)  # dalam bytes
+
+    def save(self, *args, **kwargs):
+        if self.file:
+            self.ukuran_file = self.file.size
+            if not self.nama_file:
+                self.nama_file = self.file.name
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Hapus file dari storage ketika record dihapus
+        if self.file and os.path.isfile(self.file.path):
+            os.remove(self.file.path)
+        super().delete(*args, **kwargs)
+
+    def get_file_size_display(self):
+        """
+        Menampilkan ukuran file dalam format yang mudah dibaca
+        """
+        if self.ukuran_file < 1024:
+            return f"{self.ukuran_file} bytes"
+        elif self.ukuran_file < 1024 * 1024:
+            return f"{self.ukuran_file / 1024:.1f} KB"
+        else:
+            return f"{self.ukuran_file / (1024 * 1024):.1f} MB"
+
+    def __str__(self):
+        return f"{self.nama_file} - {self.umkm.username}"
+
+    class Meta:
+        db_table = "file_penjualan"
+        verbose_name_plural = "File Penjualan"
+        ordering = ['-tgl_upload']

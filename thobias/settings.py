@@ -34,6 +34,11 @@ OAUTH2_CLIENT_SECRET = os.getenv('OAUTH2_CLIENT_SECRET')
 # Pastikan nilai ada
 if not OAUTH2_CLIENT_ID or not OAUTH2_CLIENT_SECRET:
     raise Exception("OAUTH2_CLIENT_ID dan OAUTH2_CLIENT_SECRET harus diatur di file .env")
+
+# Media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # mengizinkan upload file besar (dalam bytes)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
