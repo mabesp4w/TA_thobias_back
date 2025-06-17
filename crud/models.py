@@ -149,7 +149,7 @@ class Produk(models.Model):
     kategori = models.ForeignKey(KategoriProduk, on_delete=models.PROTECT, related_name='produk')
     nm_produk = models.CharField(max_length=255)
     desc = models.TextField()
-    harga = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
+    harga = models.IntegerField()
     stok = models.PositiveIntegerField(default=0)
     satuan = models.CharField(max_length=50)
     bahan_baku = models.TextField(blank=True, null=True)
@@ -190,7 +190,7 @@ class LokasiPenjualan(models.Model):
     tlp_pengelola = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
-        kab_name = self.kecamatan.kabupaten.nama if self.kecamatan else "Tidak diketahui"
+        kab_name = self.kecamatan.kabupaten.nm_kabupaten if self.kecamatan else "Tidak diketahui"
         return f"{self.nm_lokasi} - {self.tipe_lokasi} ({kab_name})"
 
     class Meta:

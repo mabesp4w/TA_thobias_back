@@ -1,7 +1,5 @@
 asgiref==3.8.1
 attrs==25.3.0
-audioop-lts==0.2.1
-audioread==3.0.1
 certifi==2025.4.26
 cffi==1.17.1
 charset-normalizer==3.4.2

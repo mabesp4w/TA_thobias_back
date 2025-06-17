@@ -11,6 +11,8 @@ from api.views import (
     LokasiPenjualanViewSet,
     ProdukTerjualViewSet,
 )
+from api.views.grafik_view import grafik_penjualan_view, grafik_penjualan_per_umkm_view, list_umkm_view, \
+    ringkasan_penjualan_view
 
 # Buat router untuk API
 router = DefaultRouter()
@@ -26,4 +28,8 @@ router.register(r'produk-terjual', ProdukTerjualViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('grafik-penjualan/', grafik_penjualan_view, name='grafik-penjualan'),
+    path('grafik-penjualan-per-umkm/', grafik_penjualan_per_umkm_view, name='grafik-penjualan-per-umkm'),
+    path('list-umkm/', list_umkm_view, name='list-umkm'),
+    path('ringkasan-penjualan/', ringkasan_penjualan_view, name='ringkasan-penjualan'),
 ]
