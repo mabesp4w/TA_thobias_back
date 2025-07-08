@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework.documentation import include_docs_urls
 from rest_framework.routers import DefaultRouter
 
-from crud.views import UserViewSet, LokasiPenjualanViewSet, ProdukTerjualViewSet, ProfilUMKMViewSet
+from crud.views import UserViewSet, LokasiPenjualanViewSet, ProdukTerjualViewSet, ProfilUMKMViewSet, \
+    KategoriLokasiPenjualanViewSet
 from crud.views.file_penjualan_view import FilePenjualanViewSet
 
 from crud.views.provinsi_view import ProvinsiViewSet
@@ -26,6 +27,7 @@ router.register(r'lokasi-penjualan', LokasiPenjualanViewSet)
 router.register(r'produk-terjual', ProdukTerjualViewSet)
 router.register(r'user', UserViewSet)
 router.register(r'file-penjualan', FilePenjualanViewSet)
+router.register(r'kategori-lokasi-penjualan', KategoriLokasiPenjualanViewSet)
 
 
 urlpatterns = [

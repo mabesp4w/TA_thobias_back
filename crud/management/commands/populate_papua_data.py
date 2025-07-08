@@ -10,7 +10,8 @@ from django.utils import timezone
 
 from crud.models import (
     Provinsi, Kabupaten, Kecamatan, KategoriProduk,
-    LokasiPenjualan, ProfilUMKM, LokasiUMKM, Produk, ProdukTerjual
+    KategoriLokasi, LokasiPenjualan, ProfilUMKM, LokasiUMKM,
+    Produk, ProdukTerjual
 )
 
 User = get_user_model()
@@ -106,40 +107,27 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f'Created: {kategori}')
 
-        # 5. Create Lokasi Penjualan
-        tipe_lokasi_choices = ['kios', 'pasar', 'supermarket', 'online', 'lainnya']
-        lokasi_penjualan_data = [
-            {'nm_lokasi': 'Pasar Sentani', 'tipe_lokasi': 'pasar', 'alamat': 'Jl. Raya Sentani, Jayapura'},
-            {'nm_lokasi': 'Toko Oleh-oleh Papua', 'tipe_lokasi': 'kios', 'alamat': 'Jl. Ahmad Yani, Jayapura'},
-            {'nm_lokasi': 'Pasar Yotefa', 'tipe_lokasi': 'pasar', 'alamat': 'Abepura, Jayapura'},
-            {'nm_lokasi': 'Galeri Kerajinan Papua', 'tipe_lokasi': 'kios', 'alamat': 'Biak Kota, Biak Numfor'},
-            {'nm_lokasi': 'Pasar Tradisional Biak', 'tipe_lokasi': 'pasar', 'alamat': 'Biak Kota, Biak Numfor'},
-            {'nm_lokasi': 'Marketplace Online Papua', 'tipe_lokasi': 'online', 'alamat': 'Platform Digital'},
-            {'nm_lokasi': 'Toko Suku Asmat', 'tipe_lokasi': 'kios', 'alamat': 'Agats, Asmat'},
-            {'nm_lokasi': 'Koperasi Petani Merauke', 'tipe_lokasi': 'lainnya', 'alamat': 'Merauke'},
-            {'nm_lokasi': 'Supermarket Mimika Mall', 'tipe_lokasi': 'supermarket', 'alamat': 'Timika, Mimika'},
-            {'nm_lokasi': 'Pasar Nabire', 'tipe_lokasi': 'pasar', 'alamat': 'Nabire Kota'},
+        # 5. Create Kategori Lokasi (NEW)
+        kategori_lokasi_data = [
+            {'nm_kategori_lokasi': 'Pasar Tradisional', 'desc': 'Pasar tradisional dan pasar rakyat'},
+            {'nm_kategori_lokasi': 'Toko Retail', 'desc': 'Toko eceran dan retail modern'},
+            {'nm_kategori_lokasi': 'Online Marketplace', 'desc': 'Platform penjualan online'},
+            {'nm_kategori_lokasi': 'Galeri & Showroom', 'desc': 'Galeri seni dan showroom produk'},
+            {'nm_kategori_lokasi': 'Koperasi', 'desc': 'Koperasi dan unit usaha bersama'},
+            {'nm_kategori_lokasi': 'Supermarket', 'desc': 'Supermarket dan hypermarket'},
+            {'nm_kategori_lokasi': 'Event & Pameran', 'desc': 'Pameran temporer dan event'},
+            {'nm_kategori_lokasi': 'Direct Selling', 'desc': 'Penjualan langsung door to door'},
         ]
 
-        lokasi_penjualan_objects = []
-        for i, lok_data in enumerate(lokasi_penjualan_data):
-            # Randomly assign kecamatan
-            kecamatan = random.choice(kecamatan_objects) if kecamatan_objects else None
-
-            lokasi, created = LokasiPenjualan.objects.get_or_create(
-                nm_lokasi=lok_data['nm_lokasi'],
-                defaults={
-                    'tipe_lokasi': lok_data['tipe_lokasi'],
-                    'alamat': lok_data['alamat'],
-                    'latitude': -2.5 + random.uniform(-1, 1),  # Around Papua coordinates
-                    'longitude': 140.7 + random.uniform(-2, 2),
-                    'kecamatan': kecamatan,
-                    'tlp_pengelola': f'0811{random.randint(1000000, 9999999)}'
-                }
+        kategori_lokasi_objects = []
+        for kat_lok_data in kategori_lokasi_data:
+            kategori_lokasi, created = KategoriLokasi.objects.get_or_create(
+                nm_kategori_lokasi=kat_lok_data['nm_kategori_lokasi'],
+                defaults={'desc': kat_lok_data['desc']}
             )
-            lokasi_penjualan_objects.append(lokasi)
+            kategori_lokasi_objects.append(kategori_lokasi)
             if created:
-                self.stdout.write(f'Created: {lokasi}')
+                self.stdout.write(f'Created: {kategori_lokasi}')
 
         # 6. Create Users (UMKM)
         umkm_users_data = [
@@ -171,7 +159,7 @@ class Command(BaseCommand):
                     'last_name': user_data['last_name'],
                     'role': 'umkm',  # Assuming you have a role field
                     'is_active': True,
-                    'show_password':'password123'
+                    'show_password': 'password123'  # Updated field name
                 }
             )
             if created:
@@ -236,7 +224,46 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f'Created lokasi UMKM: {lokasi_umkm}')
 
-        # 9. Create Produk
+        # 9. Create Lokasi Penjualan (UPDATED - now assigned to specific UMKM)
+        lokasi_penjualan_templates = [
+            {'nm_lokasi': 'Outlet Utama', 'alamat': 'Jl. Raya Sentani, Jayapura'},
+            {'nm_lokasi': 'Cabang Pasar', 'alamat': 'Pasar Tradisional'},
+            {'nm_lokasi': 'Toko Online', 'alamat': 'Platform Digital'},
+            {'nm_lokasi': 'Stand Pameran', 'alamat': 'Event Center'},
+            {'nm_lokasi': 'Kios Pasar', 'alamat': 'Pasar Rakyat'},
+        ]
+
+        lokasi_penjualan_objects = []
+        # Create lokasi penjualan for each UMKM
+        for user in umkm_users:
+            # Each UMKM gets 1-3 lokasi penjualan
+            num_lokasi = random.randint(1, 3)
+            for i in range(num_lokasi):
+                template = random.choice(lokasi_penjualan_templates)
+                kecamatan = random.choice(kecamatan_objects)
+                kategori_lokasi = random.choice(kategori_lokasi_objects)
+
+                # Make unique name per UMKM
+                nm_lokasi = f"{template['nm_lokasi']} - {user.profil_umkm.nm_bisnis}"
+
+                lokasi, created = LokasiPenjualan.objects.get_or_create(
+                    umkm=user,
+                    nm_lokasi=nm_lokasi[:255],  # Ensure it fits in CharField
+                    defaults={
+                        'alamat': f"{template['alamat']}, {kecamatan.nm_kecamatan}",
+                        'latitude': -2.5 + random.uniform(-1, 1),
+                        'longitude': 140.7 + random.uniform(-2, 2),
+                        'kecamatan': kecamatan,
+                        'kategori_lokasi': kategori_lokasi,
+                        'tlp_pengelola': f'0811{random.randint(1000000, 9999999)}',
+                        'aktif': True
+                    }
+                )
+                lokasi_penjualan_objects.append(lokasi)
+                if created:
+                    self.stdout.write(f'Created: {lokasi}')
+
+        # 10. Create Produk
         produk_data = [
             {'nm_produk': 'Tas Noken Asli', 'kategori': 'Kerajinan Tangan', 'satuan': 'buah',
              'harga_range': (150000, 500000)},
@@ -281,6 +308,7 @@ class Command(BaseCommand):
         ]
 
         produk_objects = []
+        # Distribute products among UMKMs
         for i, prod_data in enumerate(produk_data):
             umkm = umkm_users[i % len(umkm_users)]
             kategori = next((k for k in kategori_objects if k.nm_kategori == prod_data['kategori']),
@@ -293,7 +321,7 @@ class Command(BaseCommand):
                 defaults={
                     'kategori': kategori,
                     'desc': f'Produk {prod_data["nm_produk"]} berkualitas tinggi dengan cita rasa khas Papua. Dibuat dengan bahan alami pilihan.',
-                    'harga': Decimal(str(harga)),
+                    'harga': harga,  # Changed from Decimal
                     'stok': random.randint(10, 100),
                     'satuan': prod_data['satuan'],
                     'bahan_baku': f'Bahan alami khas Papua untuk {prod_data["nm_produk"]}',
@@ -305,34 +333,70 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f'Created produk: {produk}')
 
-        # 10. Create ProdukTerjual
+        # Add more products to ensure each UMKM has at least 2-3 products
+        for user in umkm_users:
+            user_products = [p for p in produk_objects if p.umkm == user]
+            if len(user_products) < 2:
+                # Create additional products for this UMKM
+                for j in range(2 - len(user_products)):
+                    template = random.choice(produk_data)
+                    kategori = next((k for k in kategori_objects if k.nm_kategori == template['kategori']),
+                                    random.choice(kategori_objects))
+                    harga = random.randint(template['harga_range'][0], template['harga_range'][1])
+
+                    produk = Produk.objects.create(
+                        umkm=user,
+                        kategori=kategori,
+                        nm_produk=f"{template['nm_produk']} Spesial",
+                        desc=f'Varian spesial dari {template["nm_produk"]}',
+                        harga=harga,
+                        stok=random.randint(5, 50),
+                        satuan=template['satuan'],
+                        bahan_baku='Bahan pilihan terbaik',
+                        metode_produksi='Metode tradisional yang disempurnakan',
+                        aktif=True
+                    )
+                    produk_objects.append(produk)
+                    self.stdout.write(f'Created additional produk: {produk}')
+
+        # 11. Create ProdukTerjual (UPDATED - ensuring lokasi belongs to same UMKM)
         # Create sales records for the last 3 months
         start_date = date.today() - timedelta(days=90)
+
         for produk in produk_objects:
-            # Create 3-8 sales records per product
-            num_sales = random.randint(3, 8)
-            for _ in range(num_sales):
-                tgl_penjualan = start_date + timedelta(days=random.randint(0, 90))
-                jumlah_terjual = random.randint(1, 10)
-                harga_jual = int(produk.harga * random.uniform(0.9, 1.1))  # Price variation ±10%
+            # Get lokasi penjualan that belong to the same UMKM as the product
+            umkm_lokasi = [lok for lok in lokasi_penjualan_objects if lok.umkm == produk.umkm]
 
-                penjualan = ProdukTerjual.objects.create(
-                    produk=produk,
-                    lokasi_penjualan=random.choice(lokasi_penjualan_objects),
-                    tgl_penjualan=tgl_penjualan,
-                    jumlah_terjual=jumlah_terjual,
-                    harga_jual=harga_jual,
-                    catatan=f'Penjualan {produk.nm_produk} di {random.choice(lokasi_penjualan_objects).nm_lokasi}'
-                )
-                self.stdout.write(f'Created penjualan: {penjualan}')
+            if umkm_lokasi:  # Only create sales if UMKM has lokasi
+                # Create 3-8 sales records per product
+                num_sales = random.randint(3, 8)
+                for _ in range(num_sales):
+                    tgl_penjualan = start_date + timedelta(days=random.randint(0, 90))
+                    jumlah_terjual = random.randint(1, 10)
+                    harga_jual = int(produk.harga * random.uniform(0.9, 1.1))  # Price variation ±10%
 
+                    # Use lokasi from same UMKM
+                    lokasi = random.choice(umkm_lokasi)
+
+                    penjualan = ProdukTerjual.objects.create(
+                        produk=produk,
+                        lokasi_penjualan=lokasi,
+                        tgl_penjualan=tgl_penjualan,
+                        jumlah_terjual=jumlah_terjual,
+                        harga_jual=harga_jual,
+                        catatan=f'Penjualan {produk.nm_produk} di {lokasi.nm_lokasi}'
+                    )
+                    self.stdout.write(f'Created penjualan: {penjualan}')
+
+        # Summary
         self.stdout.write(
             self.style.SUCCESS(
-                f'Successfully populated database with Papua UMKM data:\n'
+                f'\nSuccessfully populated database with Papua UMKM data:\n'
                 f'- 1 Provinsi (Papua)\n'
                 f'- {len(kabupaten_objects)} Kabupaten/Kota\n'
                 f'- {len(kecamatan_objects)} Kecamatan\n'
                 f'- {len(kategori_objects)} Kategori Produk\n'
+                f'- {len(kategori_lokasi_objects)} Kategori Lokasi\n'
                 f'- {len(lokasi_penjualan_objects)} Lokasi Penjualan\n'
                 f'- {len(umkm_users)} UMKM Users\n'
                 f'- {len(produk_objects)} Produk\n'

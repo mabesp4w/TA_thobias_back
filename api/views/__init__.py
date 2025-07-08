@@ -7,6 +7,7 @@ from .kategori_produk_views import KategoriProdukViewSet
 from .produk_views import ProdukViewSet
 from .lokasi_penjualan_views import LokasiPenjualanViewSet
 from .produk_terjual_views import ProdukTerjualViewSet
+from .kategori_lokasi_penjualan_views import KategoriLokasiPenjualanViewSet
 
 __all__ = [
     'ProvinsiViewSet',
@@ -18,4 +19,5 @@ __all__ = [
     'ProdukViewSet',
     'LokasiPenjualanViewSet',
     'ProdukTerjualViewSet',
+    'KategoriLokasiPenjualanViewSet',
 ]

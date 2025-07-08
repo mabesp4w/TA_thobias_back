@@ -168,36 +168,73 @@ class Produk(models.Model):
         verbose_name_plural = "Produk"
         ordering = ['nm_produk']
 
+class KategoriLokasi(models.Model):
+    """
+    Model untuk kategori lokasi
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nm_kategori_lokasi = models.CharField(max_length=100)
+    desc = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.nm_kategori_lokasi
+
+    class Meta:
+        db_table = "kategori_lokasi"
+        verbose_name_plural = "Kategori lokasi"
+        ordering = ['nm_kategori_lokasi']
 
 class LokasiPenjualan(models.Model):
     """
     Model untuk menyimpan informasi lokasi penjualan produk UMKM
+    Setiap UMKM dapat menentukan lokasi penjualan mereka sendiri
     """
-    # TIPE_LOKASI_CHOICES = (
-    #     ('kios', 'Kios/Toko'),
-    #     ('pasar', 'Pasar Tradisional'),
-    #     ('supermarket', 'Supermarket'),
-    #     ('online', 'Marketplace Online'),
-    #     ('lainnya', 'Lainnya'),
-    # )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    umkm = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='lokasi_penjualan',
+        help_text="UMKM pemilik lokasi penjualan"
+    )
     nm_lokasi = models.CharField(max_length=255)
-    tipe_lokasi = models.CharField(max_length=20)
     alamat = models.TextField()
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
-    kecamatan = models.ForeignKey(Kecamatan, on_delete=models.PROTECT, related_name='lokasi_penjualan', null=True,
-                                  blank=True)
     tlp_pengelola = models.CharField(max_length=20, blank=True, null=True)
+    kecamatan = models.ForeignKey(
+        Kecamatan,
+        on_delete=models.PROTECT,
+        related_name='lokasi_penjualan',
+        null=True,
+        blank=True
+    )
+    kategori_lokasi = models.ForeignKey(
+        KategoriLokasi,
+        on_delete=models.PROTECT,
+        related_name='lokasi_penjualan',
+        null=True,
+        blank=True
+    )
+    aktif = models.BooleanField(default=True, help_text="Status aktif lokasi penjualan")
+    tgl_dibuat = models.DateTimeField(auto_now_add=True)
+    tgl_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         kab_name = self.kecamatan.kabupaten.nm_kabupaten if self.kecamatan else "Tidak diketahui"
-        return f"{self.nm_lokasi} - {self.tipe_lokasi} ({kab_name})"
+        umkm_name = getattr(getattr(self.umkm, 'profil_umkm', None), 'nm_bisnis', self.umkm.username)
+        return f"{self.nm_lokasi} - {umkm_name} ({kab_name})"
 
     class Meta:
         db_table = "lokasi_penjualan"
         verbose_name_plural = "Lokasi Penjualan"
-        ordering = ['nm_lokasi']
+        ordering = ['umkm', 'nm_lokasi']
+        # Constraint untuk memastikan UMKM tidak membuat lokasi dengan nama sama
+        constraints = [
+            models.UniqueConstraint(
+                fields=['umkm', 'nm_lokasi'],
+                name='unique_lokasi_per_umkm'
+            )
+        ]
 
 
 class ProdukTerjual(models.Model):
@@ -206,8 +243,12 @@ class ProdukTerjual(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     produk = models.ForeignKey(Produk, on_delete=models.CASCADE, related_name='penjualan')
-    lokasi_penjualan = models.ForeignKey(LokasiPenjualan, on_delete=models.SET_NULL, null=True,
-                                         related_name='penjualan')
+    lokasi_penjualan = models.ForeignKey(
+        LokasiPenjualan,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='penjualan'
+    )
     tgl_penjualan = models.DateField()
     jumlah_terjual = models.PositiveIntegerField()
     harga_jual = models.IntegerField()
@@ -215,7 +256,21 @@ class ProdukTerjual(models.Model):
     catatan = models.TextField(blank=True, null=True)
     tgl_pelaporan = models.DateTimeField(auto_now_add=True)
 
+    def clean(self):
+        """
+        Validasi untuk memastikan lokasi penjualan milik UMKM yang sama dengan produk
+        """
+        from django.core.exceptions import ValidationError
+
+        if self.lokasi_penjualan and self.produk:
+            if self.lokasi_penjualan.umkm != self.produk.umkm:
+                raise ValidationError(
+                    "Lokasi penjualan harus milik UMKM yang sama dengan produk"
+                )
+
     def save(self, *args, **kwargs):
+        # Validasi sebelum save
+        self.clean()
         # Hitung total penjualan
         self.total_penjualan = self.jumlah_terjual * self.harga_jual
         super().save(*args, **kwargs)
@@ -226,7 +281,7 @@ class ProdukTerjual(models.Model):
     class Meta:
         db_table = "produk_terjual"
         verbose_name_plural = "Produk Terjual"
-        ordering = ['tgl_penjualan']
+        ordering = ['-tgl_penjualan']
 
 
 def validate_excel_file(value):

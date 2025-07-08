@@ -9,7 +9,7 @@ from api.views import (
     KategoriProdukViewSet,
     ProdukViewSet,
     LokasiPenjualanViewSet,
-    ProdukTerjualViewSet,
+    ProdukTerjualViewSet, KategoriLokasiPenjualanViewSet,
 )
 from api.views.grafik_view import grafik_penjualan_view, grafik_penjualan_per_umkm_view, list_umkm_view, \
     ringkasan_penjualan_view
@@ -25,6 +25,8 @@ router.register(r'kategori-produk', KategoriProdukViewSet)
 router.register(r'produk', ProdukViewSet)
 router.register(r'lokasi-penjualan', LokasiPenjualanViewSet)
 router.register(r'produk-terjual', ProdukTerjualViewSet)
+router.register(r'kategori-lokasi-penjualan', KategoriLokasiPenjualanViewSet)
+
 
 urlpatterns = [
     path('', include(router.urls)),

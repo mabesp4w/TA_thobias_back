@@ -7,6 +7,7 @@ from .kategori_produk_serializers import KategoriProdukSerializer
 from .produk_serializers import ProdukSerializer
 from .lokasi_penjualan_serializers import LokasiPenjualanSerializer
 from .produk_terjual_serializers import ProdukTerjualSerializer
+from .kategori_lokasi_penjualan_serializers import KategoriLokasiPenjualanSerializer
 
 __all__ = [
     'ProvinsiSerializer',
@@ -18,4 +19,5 @@ __all__ = [
     'ProdukSerializer',
     'LokasiPenjualanSerializer',
     'ProdukTerjualSerializer',
+    'KategoriLokasiPenjualanSerializer',
 ]

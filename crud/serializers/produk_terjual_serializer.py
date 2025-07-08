@@ -1,3 +1,5 @@
+# serialisers/produk_terjual_serializer.py
+
 from rest_framework import serializers
 from ..models import ProdukTerjual
 from decimal import Decimal
