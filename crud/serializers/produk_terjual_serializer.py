@@ -67,7 +67,6 @@ class ProdukTerjualSerializer(serializers.ModelSerializer):
         result = {
             'id': lokasi.id,
             'nm_lokasi': lokasi.nm_lokasi,
-            'tipe_lokasi': lokasi.tipe_lokasi,
             'alamat': lokasi.alamat
         }
 
@@ -247,5 +246,4 @@ class ProdukTerjualListSerializer(serializers.ModelSerializer):
         return {
             'id': obj.lokasi_penjualan.id,
             'nm_lokasi': obj.lokasi_penjualan.nm_lokasi,
-            'tipe_lokasi': obj.lokasi_penjualan.tipe_lokasi
         }

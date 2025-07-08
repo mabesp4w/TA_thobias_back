@@ -10,10 +10,10 @@ class LokasiPenjualanViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = LokasiPenjualan.objects.all()
     serializer_class = LokasiPenjualanSerializer
-    filterset_fields = ['nm_lokasi', 'tipe_lokasi', 'kecamatan']
-    search_fields = ['nm_lokasi', 'alamat', 'tipe_lokasi',
+    filterset_fields = ['nm_lokasi',  'kecamatan']
+    search_fields = ['nm_lokasi', 'alamat',
                      'kecamatan__nm_kecamatan', 'kecamatan__kabupaten__nm_kabupaten']
-    ordering_fields = ['nm_lokasi', 'tipe_lokasi']
+    ordering_fields = ['nm_lokasi']
     ordering = ['nm_lokasi']
 
     def get_queryset(self):
@@ -23,13 +23,9 @@ class LokasiPenjualanViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = super().get_queryset()
 
         # Filter berdasarkan parameter
-        tipe_lokasi = self.request.query_params.get('tipe_lokasi')
         kecamatan_id = self.request.query_params.get('kecamatan_id')
         kabupaten_id = self.request.query_params.get('kabupaten_id')
         provinsi_id = self.request.query_params.get('provinsi_id')
-
-        if tipe_lokasi:
-            queryset = queryset.filter(tipe_lokasi=tipe_lokasi)
 
         if kecamatan_id:
             queryset = queryset.filter(kecamatan__id=kecamatan_id)

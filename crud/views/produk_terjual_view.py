@@ -142,3 +142,101 @@ class ProdukTerjualViewSet(viewsets.ModelViewSet):
             'message': 'Berhasil membuat data penjualan baru',
             'data': ProdukTerjualSerializer(instance).data
         }, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['put', 'patch'])
+    def update_my_sale(self, request, pk=None):
+        """
+        Update data penjualan produk milik UMKM yang sedang login
+        """
+        if request.user.role != 'umkm':
+            return Response({
+                'status': 'error',
+                'message': 'Hanya pengguna dengan role UMKM yang dapat mengupdate data penjualan'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Dapatkan instance penjualan
+        try:
+            instance = ProdukTerjual.objects.select_related(
+                'produk__umkm'
+            ).get(pk=pk, produk__umkm=request.user)
+        except ProdukTerjual.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Data penjualan tidak ditemukan atau bukan milik Anda'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Validasi produk jika diubah
+        produk_id = request.data.get('produk')
+        if produk_id:
+            try:
+                produk = Produk.objects.get(pk=produk_id, umkm=request.user)
+            except Produk.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'Produk tidak ditemukan atau bukan milik Anda'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+        # Validasi lokasi penjualan jika diubah
+        lokasi_id = request.data.get('lokasi_penjualan')
+        if lokasi_id:
+            try:
+                lokasi = LokasiPenjualan.objects.get(pk=lokasi_id, umkm=request.user)
+            except LokasiPenjualan.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'Lokasi penjualan tidak ditemukan atau bukan milik Anda'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+        # Update data
+        partial = request.method == 'PATCH'
+        serializer = ProdukTerjualSerializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        updated_instance = serializer.save()
+
+        return Response({
+            'status': 'success',
+            'message': 'Berhasil mengupdate data penjualan',
+            'data': ProdukTerjualSerializer(updated_instance).data
+        })
+
+    @action(detail=True, methods=['delete'])
+    def destroy_my_sale(self, request, pk=None):
+        """
+        Hapus data penjualan produk milik UMKM yang sedang login
+        """
+        if request.user.role != 'umkm':
+            return Response({
+                'status': 'error',
+                'message': 'Hanya pengguna dengan role UMKM yang dapat menghapus data penjualan'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Dapatkan instance penjualan
+        try:
+            instance = ProdukTerjual.objects.select_related(
+                'produk__umkm'
+            ).get(pk=pk, produk__umkm=request.user)
+        except ProdukTerjual.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': 'Data penjualan tidak ditemukan atau bukan milik Anda'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Simpan data untuk response (opsional)
+        deleted_data = {
+            'id': instance.id,
+            'produk': instance.produk.nm_produk,
+            'tgl_penjualan': instance.tgl_penjualan,
+            'jumlah_terjual': instance.jumlah_terjual,
+            'total_penjualan': instance.total_penjualan
+        }
+
+        # Hapus data
+        instance.delete()
+
+        return Response({
+            'status': 'success',
+            'message': 'Berhasil menghapus data penjualan',
+            'data': deleted_data
+        })
+
+    

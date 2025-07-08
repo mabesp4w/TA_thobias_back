@@ -13,10 +13,10 @@ class LokasiPenjualanSerializer(serializers.ModelSerializer):
 
     def get_nama_lengkap(self, obj):
         kab_name = obj.kecamatan.kabupaten.nm_kabupaten if obj.kecamatan else "Tidak diketahui"
-        return f"{obj.nm_lokasi} - {obj.tipe_lokasi} ({kab_name})"
+        return f"{obj.nm_lokasi} - ({kab_name})"
 
     class Meta:
         model = LokasiPenjualan
-        fields = ['id', 'nm_lokasi', 'tipe_lokasi', 'alamat', 'latitude', 'longitude',
+        fields = ['id', 'nm_lokasi', 'alamat', 'latitude', 'longitude',
                   'kecamatan', 'tlp_pengelola', 'nama_lengkap']
         read_only_fields = fields

@@ -9,7 +9,7 @@ from api.views import (
     KategoriProdukViewSet,
     ProdukViewSet,
     LokasiPenjualanViewSet,
-    ProdukTerjualViewSet, KategoriLokasiPenjualanViewSet,
+    ProdukTerjualViewSet, KategoriLokasiPenjualanViewSet, SalesViewSet,
 )
 from api.views.grafik_view import grafik_penjualan_view, grafik_penjualan_per_umkm_view, list_umkm_view, \
     ringkasan_penjualan_view
@@ -26,6 +26,7 @@ router.register(r'produk', ProdukViewSet)
 router.register(r'lokasi-penjualan', LokasiPenjualanViewSet)
 router.register(r'produk-terjual', ProdukTerjualViewSet)
 router.register(r'kategori-lokasi-penjualan', KategoriLokasiPenjualanViewSet)
+router.register(r'export-excel', SalesViewSet, basename='export-excel')
 
 
 urlpatterns = [
@@ -34,4 +35,5 @@ urlpatterns = [
     path('grafik-penjualan-per-umkm/', grafik_penjualan_per_umkm_view, name='grafik-penjualan-per-umkm'),
     path('list-umkm/', list_umkm_view, name='list-umkm'),
     path('ringkasan-penjualan/', ringkasan_penjualan_view, name='ringkasan-penjualan'),
+
 ]

@@ -8,6 +8,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from jsonschema.exceptions import ValidationError
+from PIL import Image  # Tambahkan ini di bagian import
+
 
 from thobias import settings
 
@@ -141,6 +143,33 @@ class KategoriProduk(models.Model):
         ordering = ['nm_kategori']
 
 
+# Fungsi untuk path upload gambar produk
+def produk_image_upload_path(instance, filename):
+    """
+    Path untuk upload gambar produk
+    Format: produk/{username}/{produk_id}/{filename}
+    """
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+    return f'produk/{instance.umkm.username}/{instance.id}/{filename}'
+
+
+def validate_image_file(value):
+    """
+    Validator untuk memastikan file yang diupload adalah gambar
+    """
+    valid_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+    ext = value.name.split('.')[-1].lower()
+
+    if ext not in valid_extensions:
+        raise ValidationError(f'Format file tidak didukung. Format yang diperbolehkan: {", ".join(valid_extensions)}')
+
+    # Limit ukuran file (5MB)
+    if value.size > 5 * 1024 * 1024:
+        raise ValidationError('Ukuran file tidak boleh lebih dari 5MB')
+
+
+# UPDATE MODEL PRODUK - Tambahkan field gambar
 class Produk(models.Model):
     """
     Model untuk produk yang dijual oleh UMKM
@@ -155,9 +184,46 @@ class Produk(models.Model):
     satuan = models.CharField(max_length=50)
     bahan_baku = models.TextField(blank=True, null=True)
     metode_produksi = models.TextField(blank=True, null=True)
+    # FIELD GAMBAR BARU
+    gambar_utama = models.ImageField(
+        upload_to=produk_image_upload_path,
+        validators=[validate_image_file],
+        blank=True,
+        null=True,
+        help_text="Gambar utama produk"
+    )
     aktif = models.BooleanField(default=True)
     tgl_dibuat = models.DateTimeField(auto_now_add=True)
     tgl_update = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        """Override save untuk optimasi gambar"""
+        super().save(*args, **kwargs)
+
+        # Optimasi ukuran gambar jika ada
+        if self.gambar_utama:
+            img_path = self.gambar_utama.path
+            if os.path.exists(img_path):
+                img = Image.open(img_path)
+
+                # Convert RGBA to RGB if needed
+                if img.mode in ('RGBA', 'LA'):
+                    rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                    rgb_img.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                    img = rgb_img
+
+                # Resize jika terlalu besar
+                max_size = (1200, 1200)
+                img.thumbnail(max_size, Image.Resampling.LANCZOS)
+
+                # Simpan dengan kualitas optimal
+                img.save(img_path, quality=85, optimize=True)
+
+    def delete(self, *args, **kwargs):
+        """Hapus file gambar saat produk dihapus"""
+        if self.gambar_utama and os.path.isfile(self.gambar_utama.path):
+            os.remove(self.gambar_utama.path)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         nm_bisnis = getattr(getattr(self.umkm, 'profil_umkm', None), 'nm_bisnis', self.umkm.username)
@@ -167,6 +233,7 @@ class Produk(models.Model):
         db_table = "produk"
         verbose_name_plural = "Produk"
         ordering = ['nm_produk']
+
 
 class KategoriLokasi(models.Model):
     """

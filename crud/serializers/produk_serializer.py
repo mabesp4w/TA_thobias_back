@@ -23,7 +23,7 @@ class ProdukSerializer(serializers.ModelSerializer):
         fields = ['id', 'umkm', 'umkm_nama', 'umkm_detail', 'nm_bisnis', 'kategori',
                   'kategori_nama', 'kategori_detail', 'nm_produk', 'desc', 'harga',
                   'stok', 'satuan', 'bahan_baku', 'metode_produksi', 'aktif',
-                  'tgl_dibuat', 'tgl_update']
+                  'tgl_dibuat', 'tgl_update','gambar_utama']
         read_only_fields = ['id', 'tgl_dibuat', 'tgl_update']
 
     def get_umkm_detail(self, obj):
@@ -120,7 +120,7 @@ class ProdukListSerializer(serializers.ModelSerializer):
         model = Produk
         fields = ['id', 'nm_produk', 'harga', 'stok', 'satuan', 'umkm', 'umkm_nama',
                   'nm_bisnis', 'umkm_detail', 'kategori', 'kategori_nama',
-                  'kategori_detail', 'aktif', 'tgl_dibuat']
+                  'kategori_detail', 'aktif', 'tgl_dibuat','gambar_utama']
 
     def get_umkm_nama(self, obj):
         """

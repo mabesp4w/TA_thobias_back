@@ -8,6 +8,7 @@ from ..models import Produk
 from ..serializers.produk_serializer import ProdukSerializer, ProdukListSerializer
 from ..filters import ProdukFilter
 from ..pagination import LaravelStylePagination
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 
 class ProdukViewSet(viewsets.ModelViewSet):
@@ -22,6 +23,8 @@ class ProdukViewSet(viewsets.ModelViewSet):
                      'kategori__nm_kategori']
     ordering_fields = ['nm_produk', 'harga', 'stok', 'tgl_dibuat', 'tgl_update']
     ordering = ['-tgl_dibuat']
+
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_serializer_class(self):
         if self.action == 'list':

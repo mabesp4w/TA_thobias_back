@@ -8,6 +8,7 @@ from .produk_views import ProdukViewSet
 from .lokasi_penjualan_views import LokasiPenjualanViewSet
 from .produk_terjual_views import ProdukTerjualViewSet
 from .kategori_lokasi_penjualan_views import KategoriLokasiPenjualanViewSet
+from .excel_export_view import SalesViewSet
 
 __all__ = [
     'ProvinsiViewSet',
@@ -20,4 +21,5 @@ __all__ = [
     'LokasiPenjualanViewSet',
     'ProdukTerjualViewSet',
     'KategoriLokasiPenjualanViewSet',
+    'SalesViewSet',
 ]
