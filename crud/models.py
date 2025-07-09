@@ -261,7 +261,9 @@ class LokasiPenjualan(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='lokasi_penjualan',
-        help_text="UMKM pemilik lokasi penjualan"
+        help_text="UMKM pemilik lokasi penjualan",
+        null=True,
+        blank=True,
     )
     nm_lokasi = models.CharField(max_length=255)
     alamat = models.TextField()
