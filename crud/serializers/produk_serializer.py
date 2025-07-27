@@ -22,7 +22,7 @@ class ProdukSerializer(serializers.ModelSerializer):
         model = Produk
         fields = ['id', 'umkm', 'umkm_nama', 'umkm_detail', 'nm_bisnis', 'kategori',
                   'kategori_nama', 'kategori_detail', 'nm_produk', 'desc', 'harga',
-                  'stok', 'satuan', 'bahan_baku', 'metode_produksi', 'aktif',
+                  'stok', 'satuan', 'bahan_baku', 'biaya_upah', 'biaya_produksi', 'metode_produksi', 'aktif',
                   'tgl_dibuat', 'tgl_update','gambar_utama']
         read_only_fields = ['id', 'tgl_dibuat', 'tgl_update']
 

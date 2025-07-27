@@ -10,7 +10,7 @@ class KategoriProdukSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = KategoriProduk
-        fields = ['id', 'nm_kategori', 'desc', 'produk_count']
+        fields = ['id', 'nm_kategori', 'jasa', 'desc', 'produk_count']
         read_only_fields = ['id']
 
     def get_produk_count(self, obj):
@@ -39,7 +39,7 @@ class KategoriProdukListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = KategoriProduk
-        fields = ['id', 'nm_kategori', 'produk_count']
+        fields = ['id', 'nm_kategori', 'jasa', 'produk_count']
 
     def get_produk_count(self, obj):
         """

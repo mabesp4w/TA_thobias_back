@@ -132,6 +132,7 @@ class KategoriProduk(models.Model):
     """
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nm_kategori = models.CharField(max_length=100)
+    jasa=models.TextField(blank=True, null=True)
     desc = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -183,6 +184,8 @@ class Produk(models.Model):
     stok = models.PositiveIntegerField(default=0)
     satuan = models.CharField(max_length=50)
     bahan_baku = models.TextField(blank=True, null=True)
+    biaya_upah =models.IntegerField(default=0)
+    biaya_produksi=models.IntegerField(default=0)
     metode_produksi = models.TextField(blank=True, null=True)
     # FIELD GAMBAR BARU
     gambar_utama = models.ImageField(
