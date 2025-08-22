@@ -3,7 +3,7 @@ from rest_framework.documentation import include_docs_urls
 from rest_framework.routers import DefaultRouter
 
 from crud.views import UserViewSet, LokasiPenjualanViewSet, ProdukTerjualViewSet, ProfilUMKMViewSet, \
-    KategoriLokasiPenjualanViewSet
+    KategoriLokasiPenjualanViewSet, AdminViewSet
 from crud.views.file_penjualan_view import FilePenjualanViewSet
 
 from crud.views.provinsi_view import ProvinsiViewSet
@@ -28,6 +28,8 @@ router.register(r'produk-terjual', ProdukTerjualViewSet)
 router.register(r'user', UserViewSet)
 router.register(r'file-penjualan', FilePenjualanViewSet)
 router.register(r'kategori-lokasi-penjualan', KategoriLokasiPenjualanViewSet)
+
+router.register(r'administrator', AdminViewSet, basename='admin')
 
 
 urlpatterns = [

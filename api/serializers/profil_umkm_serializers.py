@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from crud.models import ProfilUMKM
 
@@ -19,7 +20,11 @@ class ProfilUMKMSerializer(serializers.ModelSerializer):
     """
     Serializer untuk model ProfilUMKM (read-only)
     """
-    user = UserLiteSerializer(read_only=True)
+    id = serializers.SerializerMethodField()
+
+    def get_id(self, obj):
+        return str(obj.id).replace('-', '')
+    user = get_user_model()
     tgl_bergabung_formatted = serializers.SerializerMethodField()
 
     def get_tgl_bergabung_formatted(self, obj):

@@ -1,4 +1,5 @@
-# crud/serializers/user_serializer
+# crud/serializers/admin_serializer.py
+
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
@@ -6,23 +7,16 @@ from django.contrib.auth.password_validation import validate_password
 from authentication.models import User
 
 
-class UserListSerializer(serializers.ModelSerializer):
-    """
-    Serializer untuk menampilkan daftar user (tanpa detail lengkap)
-    """
-
+class AdminListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'show_password', 'last_name', 'role', 'is_active',
-                  'date_joined',
-                  'last_login']
+        fields = ['id', 'email', 'first_name', 'username', 'show_password', 'last_name', 'role', 'is_active',
+                  'date_joined', 'last_login']
         read_only_fields = ['date_joined', 'last_login']
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer untuk operasi CRUD pada model User
-    """
+class AdminSerializer(serializers.ModelSerializer):
+
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password_confirmation = serializers.CharField(write_only=True, required=True)
     show_password = serializers.CharField(read_only=True)
@@ -51,7 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         """
-        Validasi agar username harus unik (opsional karena biasanya sudah unique di model)
+        Validasi agar username harus unik
         """
         # Check untuk create (instance belum ada)
         if not self.instance and User.objects.filter(username=value).exists():
@@ -83,7 +77,7 @@ class UserSerializer(serializers.ModelSerializer):
         # Remove password_confirmation dari validated_data
         validated_data.pop('password_confirmation', None)
 
-        # Ambil password dan username
+        # Ambil password
         password = validated_data.pop('password')
 
         # Buat user dengan data yang tersisa
