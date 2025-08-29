@@ -1,5 +1,6 @@
 # crud/views/user_view
 from rest_framework import viewsets, filters, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -39,7 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'me':
+        if self.action == 'me' or self.action == 'me_update':
             permission_classes = [IsAuthenticated]
         else:
             permission_classes = [IsAdmin]
@@ -283,3 +284,36 @@ class UserViewSet(viewsets.ModelViewSet):
             'message': 'Berhasil mendapatkan daftar pengguna UMKM',
             'data': serializer.data
         })
+
+    @action(detail=False, methods=['put', 'patch'])
+    def me_update(self, request):
+        user = request.user
+        partial = request.method == 'PATCH'
+        serializer = UserSerializer(user, data=request.data, partial=partial)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({
+                'status': 'success',
+                'message': 'Berhasil memperbarui data diri',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except ValidationError as e:
+            # Tangkap validation error dan format ulang
+            return Response({
+                'status': 'error',
+                'message': 'Gagal memperbarui data diri',
+                'data': None,  # atau bisa diganti dengan detail error jika mau
+                'errors': e.detail  # Ini akan berisi dict error seperti {'field': ['msg']}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            # Tangkap error umum lainnya
+            return Response({
+                'status': 'error',
+                'message': 'Terjadi kesalahan tidak terduga',
+                'data': None,
+                'errors': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

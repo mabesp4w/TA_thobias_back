@@ -23,16 +23,30 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Serializer untuk operasi CRUD pada model User
     """
-    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    password_confirmation = serializers.CharField(write_only=True, required=True)
+    password = serializers.CharField(
+        write_only=True,
+        required=False,  # <- bikin opsional
+        allow_blank=True  # <- boleh string kosong saat update
+    )
+    password_confirmation = serializers.CharField(
+        write_only=True,
+        required=False,
+        allow_blank=True
+    )
     show_password = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'password_confirmation',
-                  'first_name', 'last_name', 'role', 'is_active', 'is_staff',
-                  'show_password', 'date_joined', 'last_login']
-        read_only_fields = ['date_joined', 'last_login']
+        fields = [
+            'id', 'username', 'email', 'password', 'password_confirmation',
+            'first_name', 'last_name', 'role', 'is_active', 'is_staff',
+            'show_password', 'date_joined', 'last_login'
+        ]
+        extra_kwargs = {
+            'username': {'required': False},  # ini berpengaruh karena field model
+            'date_joined': {'read_only': True},
+            'last_login': {'read_only': True},
+        }
 
     def validate_email(self, value):
         """
@@ -64,14 +78,17 @@ class UserSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        # Validasi password dan konfirmasi password harus sama
-        if 'password' in attrs and 'password_confirmation' in attrs:
-            if attrs['password'] != attrs['password_confirmation']:
+        password = attrs.get('password')
+        password_confirmation = attrs.get('password_confirmation')
+
+        # Validasi hanya jika password diisi
+        if password or password_confirmation:
+            if password != password_confirmation:
                 raise serializers.ValidationError({
                     "password_confirmation": "Password dan konfirmasi password tidak cocok."
                 })
 
-        # Validasi email tidak boleh kosong jika disediakan
+        # Validasi email tidak boleh kosong jika field diberikan
         if 'email' in attrs and not attrs['email']:
             raise serializers.ValidationError({
                 "email": "Email tidak boleh kosong."
@@ -98,12 +115,12 @@ class UserSerializer(serializers.ModelSerializer):
         # Remove password_confirmation dari validated_data
         validated_data.pop('password_confirmation', None)
 
-        # Jika password ada dalam validated_data, update password
-        if 'password' in validated_data:
-            password = validated_data.pop('password')
+        # Kalau ada key password, tapi kosong → abaikan
+        password = validated_data.pop('password', None)
+        if password:
             instance.set_password(password)
 
-        # Update field lainnya
+        # Update field lain
         for key, value in validated_data.items():
             setattr(instance, key, value)
 
