@@ -24,7 +24,7 @@ class ProfilUMKMSerializer(serializers.ModelSerializer):
         model = ProfilUMKM
         fields = ['id', 'user', 'username', 'email', 'first_name', 'last_name',
                   'user_detail', 'nama_pemilik', 'nm_bisnis', 'alamat',
-                  'tlp', 'desc_bisnis', 'tgl_bergabung']
+                  'tlp', 'desc_bisnis', 'tgl_bergabung','total_laki','total_perempuan']
         read_only_fields = ['id', 'user', 'tgl_bergabung']
 
     def get_user_detail(self, obj):
@@ -77,7 +77,7 @@ class ProfilUMKMListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfilUMKM
         fields = ['id', 'user', 'username', 'nama_pemilik', 'email_pemilik', 'alamat',
-                  'user_detail', 'nm_bisnis', 'tlp', 'tgl_bergabung']
+                  'user_detail', 'nm_bisnis', 'tlp', 'tgl_bergabung', 'total_laki', 'total_perempuan']
 
     def get_nama_pemilik(self, obj):
         """

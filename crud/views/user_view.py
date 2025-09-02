@@ -119,6 +119,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 profile = ProfilUMKM(
                     user=instance,
                     nm_bisnis=profile_data.get('nm_bisnis', ''),
+                    total_laki=profile_data.get('total_laki', 0),
+                    total_perempuan=profile_data.get('total_perempuan', 0),
                     alamat=profile_data.get('alamat', ''),
                     tlp=profile_data.get('tlp', ''),
                     desc_bisnis=profile_data.get('desc_bisnis', '')

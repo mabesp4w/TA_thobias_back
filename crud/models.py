@@ -79,6 +79,8 @@ class ProfilUMKM(models.Model):
     tlp = models.CharField(max_length=20, blank=True, null=True)
     desc_bisnis = models.TextField(blank=True, null=True)
     tgl_bergabung = models.DateTimeField(default=timezone.now)
+    total_laki = models.PositiveIntegerField(default=0)
+    total_perempuan = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.user.username} - {self.nm_bisnis}"
