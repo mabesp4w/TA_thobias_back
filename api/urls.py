@@ -38,4 +38,6 @@ urlpatterns = [
     path('list-umkm/', list_umkm_view, name='list-umkm'),
     path('ringkasan-penjualan/', ringkasan_penjualan_view, name='ringkasan-penjualan'),
 
+    path('promosi/', include('api.promosi_urls')),
+
 ]
