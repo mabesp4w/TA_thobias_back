@@ -74,7 +74,23 @@ class ProfilUMKMViewSet(viewsets.ModelViewSet):
             request.data['user'] = request.user.id
 
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        # Handle validation error secara manual
+        if not serializer.is_valid():
+            # Ekstrak error messages
+            error_messages = []
+            for field, errors in serializer.errors.items():
+                if isinstance(errors, list):
+                    for error in errors:
+                        error_messages.append(f"{field}: {error}")
+                else:
+                    error_messages.append(f"{field}: {errors}")
+
+            return Response({
+                'status': 'error',
+                'message': '; '.join(error_messages)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         instance = serializer.save()
 
         # Return complete representation
@@ -91,7 +107,23 @@ class ProfilUMKMViewSet(viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
+
+        # Handle validation error secara manual
+        if not serializer.is_valid():
+            # Ekstrak error messages
+            error_messages = []
+            for field, errors in serializer.errors.items():
+                if isinstance(errors, list):
+                    for error in errors:
+                        error_messages.append(f"{field}: {error}")
+                else:
+                    error_messages.append(f"{field}: {errors}")
+
+            return Response({
+                'status': 'error',
+                'message': '; '.join(error_messages)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         self.perform_update(serializer)
 
         # Return complete representation
@@ -164,7 +196,23 @@ class ProfilUMKMViewSet(viewsets.ModelViewSet):
 
         partial = request.method == 'PATCH'
         serializer = ProfilUMKMSerializer(profile, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
+
+        # Handle validation error secara manual
+        if not serializer.is_valid():
+            # Ekstrak error messages
+            error_messages = []
+            for field, errors in serializer.errors.items():
+                if isinstance(errors, list):
+                    for error in errors:
+                        error_messages.append(f"{field}: {error}")
+                else:
+                    error_messages.append(f"{field}: {errors}")
+
+            return Response({
+                'status': 'error',
+                'message': '; '.join(error_messages)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         serializer.save()
 
         return Response({

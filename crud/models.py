@@ -81,6 +81,9 @@ class ProfilUMKM(models.Model):
     tgl_bergabung = models.DateTimeField(default=timezone.now)
     total_laki = models.PositiveIntegerField(default=0)
     total_perempuan = models.PositiveIntegerField(default=0)
+    fb_link = models.URLField(blank=True, null=True)
+    ig_link = models.URLField(blank=True, null=True)
+    tiktok_link = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.nm_bisnis}"
